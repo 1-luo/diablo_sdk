@@ -51,7 +51,7 @@ source devel/setup.bash && rosrun diablo_sdk status_update_and_ctrl_example
 
 ## Example 使用例程
 
-- [机器人控制、状态读取](https://github.com/DDTRobot/diablo_sdk/tree/main/example/movement_ctrl)
+- [机器人控制、状态读取](https://github.com/DDTRobot/diablo_sdk/tree/main/example/status_update_and_ctrl)
 
 
 
