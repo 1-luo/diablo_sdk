@@ -202,11 +202,6 @@ void HAL_Pi::RXMonitorProcess(void)
         }
         
         if(header.data.ACK){
-            // printf("----------------------\n");
-            // for(int i=0;i<len;i++){
-            //     printf("0x%x,",serial_rxbuf[i]);
-            // }
-            // printf("----------------------\n");
             serial_rx_ack_cond.notify_all();
         }
         else{serial_rx_data_cond.notify_all();}

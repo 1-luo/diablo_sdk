@@ -1,7 +1,6 @@
 #include "diablo_utils/diablo_tools/osdk_header.hpp"
 #include "diablo_utils/diablo_tools/osdk_vehicle.hpp"
 #include "diablo_utils/diablo_tools/osdk_telemetry.hpp"
-#include "diablo_utils/diablo_tools/osdk_virtual_rc.hpp"
 
 using namespace DIABLO::OSDK;
 
@@ -219,7 +218,7 @@ uint8_t Telemetry::connection_check()
     uint16_t ack = -1;
     uint8_t disconnect_cnt = 0;
     uint8_t result = 0;
-    while(ack != SDK_CONNECTED && disconnect_cnt < 10)
+    while(ack != SDK_CONNECTED && disconnect_cnt < 1000)
     {
         result = vehicle->hal->serialSend_ack(header.data, ack,
         OSDK_INIT_SET, OSDK_CONNECTION_CHECK_ID,
@@ -228,7 +227,7 @@ uint8_t Telemetry::connection_check()
         disconnect_cnt += 1;
         usleep(5000);
     }
-    if(disconnect_cnt > 10)
+    if(disconnect_cnt > 1000)
     {
         SerialDisconnectHandle();
         if(cnt_thd)
@@ -253,7 +252,6 @@ void Telemetry::SDKConnectMonitor(void)
 void Telemetry::SerialDisconnectHandle(void)
 {
     memset(&this->status, 0, sizeof(OSDK_Push_Data_Status_t));
-    vehicle->virtual_rc->SerialDisconnectHandle();
     vehicle->movement_ctrl->SerialDisconnectHandle();
     std::cerr<<"OSDK Serial Receive Timeout Occured!"<<std::endl;
 }
@@ -268,7 +266,7 @@ void Telemetry::SerialHandle(void)
         if(flag == NULL)
         {
             this->status.robot_mode = OSDK_ROBOT_STATE_DISCONNECT;
-            this->SerialDisconnectHandle();
+            //this->SerialDisconnectHandle();
             continue;
         }
 
@@ -283,7 +281,6 @@ void Telemetry::SerialHandle(void)
         {
             memcpy(&this->status, pData, sizeof(OSDK_Push_Data_Status_t));
             vehicle->movement_ctrl->CtrlStatusMonitorHandle(status.ctrl_mode);
-            vehicle->virtual_rc->CtrlStatusMonitorHandle(status.ctrl_mode);
             pData += sizeof(OSDK_Push_Data_Status_t);
             setNewcomeFlag(0x40);
 	        /*

@@ -35,7 +35,7 @@ uint8_t Movement_Ctrl::obtain_control(uint16_t timeout_ms)
         if(result) return result;
         if(ack == 0x0000)
         {
-            printf("NOTE: You are in manual movement_ctrl mode, please switch to SDK control mode.\n");
+            // printf("ERROR: SDK control disable on manual movement_ctrl, check your robot.\n");
             return 3;
         }
         if(ack == 0x000A)
@@ -85,10 +85,11 @@ void Movement_Ctrl::CtrlStatusMonitorHandle(const uint8_t ctrl_mode)
         ctrl_status = CTRL_OBTAINED;
         dropCtrlCnt = 0;
     }
-    else      
+    else        //if(ctrl_mode != OSDK_CTRL_MODE_MOTION)
     {
         if(dropCtrlCnt > 10)
         {
+            // printf("drop out is %d and ctrl mode is %d",(1<<(vehicle->telemetry->id*2)),ctrl_mode);
             if(ctrl_status == CTRL_OBTAINED)
                 std::cout<<"Motion control authority released by vehicle"<<std::endl;
             this->SerialDisconnectHandle();
@@ -244,7 +245,8 @@ uint8_t Movement_Ctrl::SendTransformUpCmd()
         if(result) return result;
 
         if(ack == 0)
-        {   
+        {
+            printf("==TRANSFORM UP FAIL==\n");
             return 0xFF;
         }
         usleep(10000);
@@ -346,7 +348,7 @@ uint8_t Movement_Ctrl::SendTransformDownCmd()
     header.append_crc();
 
     uint16_t ack = -1;
-    while(ack != 1)
+    while(ack != 0)
     {
         uint8_t result = vehicle->hal->serialSend_ack(header.data, ack,
             OSDK_CONTROL_SET, OSDK_TRANSFORM_ID,
@@ -354,8 +356,9 @@ uint8_t Movement_Ctrl::SendTransformDownCmd()
         
         if(result) return result;
 
-        if(ack == 0)
+        if(ack == 1)
         {
+            printf("==TRANSFORM DOWN FAIL==\n");
             return 0xFF;
         }
         usleep(10000);
